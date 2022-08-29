@@ -1,0 +1,3 @@
+[submodule "testApp/modules/subspace.js"]
+	path = testApp/modules/subspace.js
+	url = https://github.com/subspace/subspace.js.git

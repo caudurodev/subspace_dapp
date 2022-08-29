@@ -1,0 +1,65 @@
+version: "3.7"
+services:
+  node:
+    image: ghcr.io/subspace/node:gemini-1b-2022-aug-17
+    volumes:
+      - node-data:/var/subspace:rw
+    ports:
+      - "9944:9944"
+      # - "0.0.0.0:9955:9955"
+    restart: unless-stopped
+    command:
+      [
+        "--dev",
+        "--tmp",
+        "--force-authoring",
+        "--execution",
+        "wasm",
+        "--pruning",
+        "1024",
+        "--keep-blocks",
+        "1024",
+        "--port",
+        "9955",
+        # "--ws-external",
+        "--unsafe-rpc-external",
+        "--rpc-cors",
+        "ws://localhost,http://localhost,ws://node,http://node,ws://farmer,http://farmer,all,127.0.0.1,localhost",
+        "--rpc-methods",
+        "safe",
+        "--unsafe-ws-external",
+        "--validator",
+        "--name",
+        "local-test-node"
+      ]
+    healthcheck:
+      timeout: 5s
+      interval: 30s
+      retries: 5
+  farmer:
+    depends_on:
+      node:
+        condition: service_healthy
+    image: ghcr.io/subspace/farmer:gemini-1b-2022-aug-17
+    volumes:
+      - farmer-data:/var/subspace:rw
+    restart: unless-stopped
+    ports:
+      - "0.0.0.0:9955:9955"
+    command:
+      [
+        "--base-path",
+        "/var/subspace",
+        "farm",
+        "--node-rpc-url",
+        "ws://node:9944",
+        "--ws-server-listen-addr",
+        "0.0.0.0:9955",
+        "--reward-address",
+        "sucg5EMF8iqASSdRQy55V32DWfHwZK65Eq1TzdexypyFetL5K",
+        "--plot-size",
+        "2G"
+      ]
+volumes:
+  node-data:
+  farmer-data:
