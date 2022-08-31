@@ -10,5 +10,6 @@ declare module '@vue/runtime-core' {
     Footer: typeof import('./components/Footer.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    WalletConnection: typeof import('./components/WalletConnection.vue')['default']
   }
 }

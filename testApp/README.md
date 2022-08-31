@@ -54,7 +54,7 @@ The blockchain takes a while to make uploaded images availalble so the user must
 ```$ pnpm i```
 
 #### Add the subspace node_module and build it
-```$ cd modules/subspace.js && pnpm i && pnpm build```
+```$ cd modules/subspace.js && npm ci && npm run build```
 
 
 <br />
@@ -64,7 +64,7 @@ The blockchain takes a while to make uploaded images availalble so the user must
 
 ```$ pnpm dev```
 
-To be able to interact with the backend you need to add the demo account //Alice to your polkadot{js} browser extension. An  overview of the steps can be found [here.](https://mirror.xyz/0x4659B666AC0e8D4c5D1B66eC5DCd57BAF2dA350B/bGFJYZhxBojZd0Dx6DEo8OifrJgIwNxwQ4CITWixUZw).
+To be able to interact with the backend you need to add the demo account //Alice to your[polkadot{js} browser extension](https://polkadot.js.org/extension/). An  overview of the steps can be found [here.](https://mirror.xyz/0x4659B666AC0e8D4c5D1B66eC5DCd57BAF2dA350B/bGFJYZhxBojZd0Dx6DEo8OifrJgIwNxwQ4CITWixUZw).
 In short:
 1) Import the account with the mnemonic/seed
 2) Add `//Alice` as the derivation path
