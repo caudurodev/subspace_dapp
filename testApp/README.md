@@ -95,9 +95,15 @@ You might need to update the subspace submodule as it is under active developmen
 
 ## Testing
 
+Testing has been implemented with Playwright. The tests load the polkadot{js} extension and pre-build state to create the  //Alice account so that the tests can faithfully replicate a user flow.
+Most of the code for this repo was created utilizing Test Driven Development.
 
-#### E2E
-```$ pnpm test:e2e```
+**Notes:**
 
-#### Unit
-```$ pnpm test:unit```
+- It is important to occasionally update the browser extension included inside the ./e2e/polkadot--js-extension so as not to become out of synch with what users currently have.
+- TODO: Expand tests to include more browser configurations and screen resolutions.
+
+#### RUN E2E
+```$ pnpm dev```
+```$ npx playwright test```
+

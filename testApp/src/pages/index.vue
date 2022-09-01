@@ -104,11 +104,12 @@ const getIdentity = async () => {
   <div>
     <h1 text-4xl>
       Subspace Mega Image Share
+      <div class="i-logos-vue text-orange-400" />
     </h1>
     <h2 text-xl py-2>
       Upload an image to start sharing
     </h2>
-    <WalletConnection :user="user" @get-identity="getIdentity" />
+    <WalletConnection :user="user" @get-identity="getIdentity" @disconnect-wallet=" userStore.setUserName('')" />
     <div>
       <ul>
         <li v-for="(imgData, imgIndex) in imageArr" :key="imgIndex">
@@ -120,6 +121,7 @@ const getIdentity = async () => {
       Store Image
       <input
         id="file"
+        data-test="upload-image-input"
         type="file"
         accept="image/*"
         @input="$event => storeImage($event)"
@@ -129,6 +131,7 @@ const getIdentity = async () => {
       putImageId: <input v-model="putImageId" type="text" p-2 w-full>
     </div>
     <div pb-12>
+      <div i-carbon-circle-dash animate-spin text-5xl />
       Get Image
       <button btn @click="getObject">
         Get Image
