@@ -67,11 +67,9 @@ export const pollIsObjectIdReachable = (objectId: string, isReachable: Ref) => {
     if (object) {
       isReachable.value = true
       clearInterval(pollInterval)
-      console.log('isReachable true:', isReachable.value)
     }
     else {
       isReachable.value = false
-      console.log('isReachable false:', isReachable.value)
     }
   }, 2000)
 }

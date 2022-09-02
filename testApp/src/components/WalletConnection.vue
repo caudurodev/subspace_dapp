@@ -13,9 +13,14 @@ const user = toRef(props, 'user')
 </script>
 
 <template>
-  <button btn data-test="wallet-connect-btn" @click="user ? emit('disconnectWallet') : emit('getIdentity')">
+  <button class="action-btn" data-test="wallet-connect-btn" @click="user ? emit('disconnectWallet') : emit('getIdentity')">
     <span v-if="!user">Connect Wallet</span>
     <span v-if="user">Connected: <span data-test="wallet-username" text-bold>{{ user }}</span></span>
   </button>
 </template>
 
+<style>
+.action-btn{
+    @apply btn bg-blue-500 py-2 px-6 my-4 rounded-xl hover:bg-blue-700;
+}
+</style>

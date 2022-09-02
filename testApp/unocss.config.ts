@@ -24,7 +24,7 @@ export default defineConfig({
     presetTypography(),
     presetWebFonts({
       fonts: {
-        sans: 'DM Sans',
+        sans: 'Montserrat',
         serif: 'DM Serif Display',
         mono: 'DM Mono',
       },

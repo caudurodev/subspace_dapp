@@ -104,6 +104,10 @@ Most of the code for this repo was created utilizing Test Driven Development.
 - TODO: Expand tests to include more browser configurations and screen resolutions.
 
 #### RUN E2E
-```$ pnpm dev```
+
+E2E tests must be run in browser mode (not headless) with the local chain available for querying by the frontend
+
+```$ cd ./subspace-dev && docker-compose up -d```
+```$ cd /testApp && pnpm dev```
 ```$ npx playwright test```
 
