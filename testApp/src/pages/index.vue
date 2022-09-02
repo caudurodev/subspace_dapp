@@ -127,28 +127,27 @@ watch(isObjectReacheable, async (newVal) => {
       <Transition name="slide-fade">
         <div v-if="putImageId" class="action-box">
           <h3 text-lg mt-2 mb-3>
-            <Transition name="fade">
-              <span v-if="isReadyForSharing" text-white inline-block mr-2><div i="carbon-checkmark-filled inline-block" /></span>
-            </Transition>
             <div v-if="!isReadyForSharing" class="flex flex-col items-center">
               Step 3 - Wait for image to be available on the blockchain
               <small block text-grey-400>(can take a few minutes)</small>
               <div v-if="!isObjectReacheable" i-carbon-circle-dash animate-spin text-5xl block mt-8 text-white />
             </div>
-            <div v-if="isReadyForSharing">
-              <span text-white inline-block mr-2><div i="carbon-checkmark-filled inline-block" /></span>
-              Step 3 - Done!
-              <br>
-              <RouterLink block :to="`/img/${putImageId}`">
-                <span inline-block mr-2><div i="carbon-share inline-block" /></span> Click to share the image:
-              </RouterLink>
-              <RouterLink :to="`/img/${putImageId}`" mt-4 py-4>
-                <div
-                  class="bg-center w-full h-32 bg-green-400 py-4"
-                  :style="{ 'background-image': `url(${dataToImage(blockchainImageData)})` }"
-                />
-              </RouterLink>
-            </div>
+            <Transition name="fade">
+              <div v-if="isReadyForSharing">
+                <span text-white inline-block mr-2><div i="carbon-checkmark-filled inline-block" /></span>
+                Step 3 - Done!
+                <br>
+                <RouterLink block :to="`/img/${putImageId}`">
+                  <span inline-block mr-2><div i="carbon-share inline-block" /></span> Click to share the image:
+                </RouterLink>
+                <RouterLink :to="`/img/${putImageId}`" mt-4 py-4>
+                  <div
+                    class="bg-center w-full h-32 bg-green-400 py-4"
+                    :style="{ 'background-image': `url(${dataToImage(blockchainImageData)})` }"
+                  />
+                </RouterLink>
+              </div>
+            </Transition>
           </h3>
         </div>
       </Transition>

@@ -4,13 +4,24 @@
 
 <template>
   <div py-8>
-    <h1 text-4xl font-900 text-gray-700 dark:text-white>
-      Subspace Mega Image Share
-      <div class="i-logos-vue text-orange-400" />
-    </h1>
-    <h2 text-xl py-2>
-      Upload any image to start sharing on the blockchain!
-    </h2>
+    <RouterLink to="/">
+      <h1 md:text-7xl text-5xl font-900 text-gray-700 dark:text-white>
+        Subspace Mega
+        <br>
+        Image Share
+        <div class="i-logos-vue text-orange-400" />
+      </h1>
+      <h2 text-xl pt-6>
+        Upload any image to start sharing on the blockchain!
+      </h2>
+    </RouterLink>
   </div>
 </template>
 
+<style scoped>
+h1{
+    background-image: linear-gradient(45deg, #4A75EF, #E7344D);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+</style>
