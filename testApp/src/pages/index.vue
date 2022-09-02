@@ -1,77 +1,31 @@
 <script setup lang="ts">
-import { Buffer } from 'buffer'
 import { Identity, SubspaceClient } from '@subspace/subspace'
 import { useUserStore } from '~/store/user'
+import { dataToImage, getObject, pollIsObjectIdReachable, putObject } from '~/composables/useSubspace'
 // import { useTimeoutPoll } from '@vueuse/core'
 
 const fileData = ref()
 const imageArr = ref([])
+const isGettingObject = ref(false)
+const isObjectReacheable = ref(false)
 const putImageId = ref()
 const userStore = useUserStore()
 const { user } = toRefs(userStore)
-
-const putObject = async (fileData) => {
-  const identity = await Identity.fromWeb3()
-  const subspaceClient = await SubspaceClient.connect(
-    identity,
-    import.meta.env.VITE_NODE_WS_PROVIDER,
-    import.meta.env.VITE_FARMER_WS_PROVIDER,
-  )
-  try {
-    const objectId = await subspaceClient.putObject(fileData)
-    putImageId.value = objectId
-  }
-  catch (e) {
-    console.log('error put object', e)
-  }
-}
-
-// const { isActive, pause, resume } = await useTimeoutPoll(async (objectId) => {
-//   const identity = await Identity.fromWeb3()
-//   const subspaceClient = await SubspaceClient.connect(
-//     identity,
-//     import.meta.env.VITE_NODE_WS_PROVIDER,
-//     import.meta.env.VITE_FARMER_WS_PROVIDER,
-//   )
-//   try {
-//     await subspaceClient.getObject(objectId)
-//     return true
-//   }
-//   catch {
-//     return false
-//   }
-// }, 1000)
 
 const loadFile = (file) => {
   const reader = new FileReader()
   reader.onload = async () => {
     if (reader.result) {
+      isGettingObject.value = true
       fileData.value = new Uint8Array(reader.result)
-      putObject(fileData.value)
+      const objectId: string = await putObject(fileData.value)
+      if (objectId) {
+        putImageId.value = objectId
+        pollIsObjectIdReachable(objectId, isObjectReacheable)
+      }
     }
   }
   reader.readAsArrayBuffer(file)
-}
-
-// Please, note: Archiving takes 100-120 blocks to complete, the object is not retrievable right away
-const getObject = async () => {
-  const identity = await Identity.fromWeb3()
-  const subspaceClient = await SubspaceClient.connect(
-    identity,
-    import.meta.env.VITE_NODE_WS_PROVIDER,
-    import.meta.env.VITE_FARMER_WS_PROVIDER,
-  )
-  try {
-    const object = await subspaceClient.getObject(putImageId.value)
-    imageArr.value.push(object)
-  }
-  catch (e) {
-    console.log('error get object:', e)
-  }
-}
-
-const dataToImage = (object) => {
-  return `data:image/*;base64,${Buffer.from(object).toString('base64')}`
 }
 
 const storeImage = (e) => {
@@ -87,6 +41,14 @@ const getLabel = ({ address, meta }) => {
   return `${meta.name.toUpperCase()} | ${address}`
 }
 
+const getImage = async () => {
+  if (!putImageId.value)
+    return
+  const imgData = await getObject(putImageId.value)
+  if (imgData)
+    imageArr.value.push(imgData)
+}
+
 const getIdentity = async () => {
   console.log('get identity')
   const identity = await Identity.fromWeb3()
@@ -98,6 +60,14 @@ const getIdentity = async () => {
   })
   userStore.setUserName(name)
 }
+
+watch(isObjectReacheable, async (newVal) => {
+  if (newVal) {
+    await getImage()
+    isObjectReacheable.value = false
+    isGettingObject.value = false
+  }
+})
 </script>
 
 <template>
@@ -129,11 +99,22 @@ const getIdentity = async () => {
     </div>
     <div>
       putImageId: <input v-model="putImageId" type="text" p-2 w-full>
+      <br>
+      isObjectReacheable:{{ isObjectReacheable }}
+      <br>
+      isGettingObject:{{ isGettingObject }}
+      <br>
+      <div v-if="isGettingObject && !isObjectReacheable">
+        waiting for object to become available in chain...<div v-if="!isObjectReacheable" i-carbon-circle-dash animate-spin text-5xl />
+      </div>
+      <RouterLink :to="`/img/${putImageId}`">
+        View
+      </RouterLink>
     </div>
     <div pb-12>
-      <div i-carbon-circle-dash animate-spin text-5xl />
+      <div v-if="isGettingObject" i-carbon-circle-dash animate-spin text-5xl />
       Get Image
-      <button btn @click="getObject">
+      <button btn :disabled="!putImageId" @click="getImage">
         Get Image
       </button>
     </div>

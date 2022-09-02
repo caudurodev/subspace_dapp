@@ -1,18 +1,30 @@
+import { Buffer } from 'buffer'
 import { Identity, SubspaceClient } from '@subspace/subspace'
-import { useTimeoutPoll } from '@vueuse/core'
+import type { Ref } from 'vue'
 
-export async function useConnectSubspace() {
-  const identity = await Identity.fromWeb3()
-  const subspaceClient = await SubspaceClient.connect(
-    identity,
+let web3Identity: Identity | null = null
+let subspaceClient: SubspaceClient | null = null
+
+export const connectSubspaceClient = async () => {
+  if (web3Identity && subspaceClient) {
+    console.log('connectSubspaceClient', web3Identity, subspaceClient)
+    return subspaceClient
+  }
+  else {
+    console.log('connectSubspaceClient...')
+  }
+  web3Identity = await Identity.fromWeb3()
+  subspaceClient = await SubspaceClient.connect(
+    web3Identity,
     import.meta.env.VITE_NODE_WS_PROVIDER,
     import.meta.env.VITE_FARMER_WS_PROVIDER,
   )
-  return { subspaceClient }
+  console.log('connectSubspaceClient:', subspaceClient)
+  return subspaceClient
 }
 
-export async function IsObjectIdReachable(objectId): boolean {
-  const { subspaceClient } = useConnectSubspace()
+export const IsObjectIdReachable = async (objectId: string): boolean => {
+  await connectSubspaceClient()
   let isReachable = false
   try {
     await subspaceClient.getObject(objectId)
@@ -25,7 +37,45 @@ export async function IsObjectIdReachable(objectId): boolean {
   return isReachable
 }
 
-export async function usePollUntillObjectIdReachable(objectId) {
-  const { isActive, pause, resume } = await useTimeoutPoll(IsObjectIdReachable(objectId), 1000)
-  return { isActive, pause, resume }
+// Please, note: Archiving takes 100-120 blocks to complete, the object is not retrievable right away
+export const getObject = async (objectId: string) => {
+  await connectSubspaceClient()
+  try {
+    return await subspaceClient.getObject(objectId)
+  }
+  catch (e) {
+    console.log('error get object:', e)
+  }
+}
+
+export const putObject = async (fileData) => {
+  await connectSubspaceClient()
+  try {
+    const objectId = await subspaceClient.putObject(fileData)
+    return objectId
+  }
+  catch (e) {
+    console.log('error put object', e)
+  }
+}
+
+let pollInterval: ReturnType<typeof setInterval>
+export const pollIsObjectIdReachable = (objectId: string, isReachable: Ref) => {
+  clearInterval(pollInterval)
+  pollInterval = setInterval(async () => {
+    const object = await getObject(objectId)
+    if (object) {
+      isReachable.value = true
+      clearInterval(pollInterval)
+      console.log('isReachable true:', isReachable.value)
+    }
+    else {
+      isReachable.value = false
+      console.log('isReachable false:', isReachable.value)
+    }
+  }, 2000)
+}
+
+export const dataToImage = (object) => {
+  return `data:image/*;base64,${Buffer.from(object).toString('base64')}`
 }
