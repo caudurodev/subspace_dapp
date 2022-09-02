@@ -1,4 +1,8 @@
 <script setup lang="ts">
+// TODO:
+// - handle cases when polkadot{js} is not present
+// - handle connection errors
+
 interface Props {
   user: string | null
 }

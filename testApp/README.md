@@ -31,7 +31,15 @@ The easiest way is via Docker. I have created a docker-compose that runs all the
 
 ```$ docker-compose up -d```
 
+or (add correct snapshot for your dev environment and your wallet address for farm reward-address ):
+
+```chmod +x subspace-farmer-macos-x86_64-gemini-1b-2022-aug-17 subspace-node-macos-x86_64-gemini-1b-2022-aug-17```
+```./subspace-node-macos-x86_64-gemini-1b-2022-aug-17 --dev --tmp ```
+```./subspace-farmer-macos-x86_64-gemini-1b-2022-aug-17 farm --reward-address sufsKsx4kZ26i7bJXc1TFguysVzjkzsDtE2VDiCEBY2WjyGAj --plot-size 2G```
+
 Alternatively, you can install the Rust tooling and run Rust nodes and farmers natively on your machine by following the instructions found [here.](https://github.com/subspace/subspace/blob/main/docs/development.md)
+
+
 
 
 The frontend expects the **farmer** to be available by default on `ws://localhost:9955` and the **node** to be running on `ws://localhost:9944`

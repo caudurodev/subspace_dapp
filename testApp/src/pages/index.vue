@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { Identity } from '@subspace/subspace'
 import { useUserStore } from '~/store/user'
-import { getObject, pollIsObjectIdReachable, putObject } from '~/composables/useSubspace'
+import { getObject, pollIsObjectIdReachable, putObject, stopPollingObjectIdReachable } from '~/composables/useSubspace'
 
 const fileData = ref()
+const fileName = ref('')
 const imageArr = ref([])
+const blockchainImageData = ref<Uint8Array | null>()
 const isGettingObject = ref(false)
 const isObjectReacheable = ref(false)
 const isReadyForSharing = ref(false)
@@ -29,12 +31,17 @@ const loadFile = (file) => {
 }
 
 const storeImage = (e) => {
+  console.log('storeimage', e)
   isReadyForSharing.value = false
   if (e.target.files[0].type.includes('image/')) {
-    if (e.target.files && e.target.files.length > 0)
+    if (e.target.files && e.target.files.length > 0) {
       loadFile(e.target.files[0])
+      fileName.value = e.target.files[0].name
+    }
   }
   else {
+    // TODO:
+    // - visually display message to user
     console.log('Please use an image file for this demo.')
   }
 }
@@ -43,18 +50,33 @@ const getImage = async () => {
   if (!putImageId.value)
     return
   const imgData = await getObject(putImageId.value)
-  if (imgData)
+  if (imgData) {
+    blockchainImageData.value = imgData
     imageArr.value.push(imgData)
+  }
 }
 
 const getIdentity = async () => {
   console.log('get identity')
   const identity = await Identity.fromWeb3()
-  let name = ''
-  identity.getKeyring().getPairs().map((account) => {
-    name = account.meta.name.toUpperCase()
-  })
-  userStore.setUserName(name)
+  if (identity) {
+    let name = ''
+    identity.getKeyring().getPairs().map((account) => {
+      name = account.meta.name.toUpperCase()
+    })
+    userStore.setUserName(name)
+  }
+  else {
+    // TODO - handle visually
+    console.log('error getting identity')
+  }
+}
+
+const resetFileUpload = () => {
+  fileName.value = ''
+  putImageId.value = ''
+  stopPollingObjectIdReachable()
+  console.log('reset')
 }
 
 watch(isObjectReacheable, async (newVal) => {
@@ -68,66 +90,68 @@ watch(isObjectReacheable, async (newVal) => {
 </script>
 
 <template>
-  <div class="w-full justify-start flex flex-col items-center">
-    <div py-8>
-      <h1 text-4xl font-900 text-gray-700>
-        Subspace Mega Image Share
-        <div class="i-logos-vue text-orange-400" />
-      </h1>
-      <h2 text-xl py-2>
-        Upload any image to start sharing on the blockchain!
-      </h2>
-    </div>
-
-    <div class="action-box">
-      <h3>
-        <Transition name="fade">
-          <span v-if="user" text-white inline-block mr-2><div i="carbon-checkmark-filled inline-block" /></span>
-        </Transition>
-        Step 1 - connect your Polkadot Wallet
-      </h3>
-      <WalletConnection :user="user" @get-identity="getIdentity" @disconnect-wallet="userStore.setUserName('')" />
-    </div>
-
-    <Transition name="slide-fade">
-      <div v-if="user" class="action-box">
-        <h3 text-lg mt-2 mb-3>
+  <div>
+    <div class="w-full justify-start flex flex-col items-center">
+      <div class="action-box">
+        <h3>
           <Transition name="fade">
-            <span v-if="putImageId" text-white inline-block mr-2><div i="carbon-checkmark-filled inline-block" /></span>
+            <span v-if="user" text-white inline-block mr-2 text-2xl><div i="carbon-checkmark-filled inline-block" /></span>
           </Transition>
-          Step 2 - Choose an image to store on the blockchain
+          Step 1 - connect your Polkadot Wallet
         </h3>
-        <label class="custom-file-upload">
-          <input
-            id="file"
-            data-test="upload-image-input"
-            type="file"
-            accept="image/*"
-            @input="$event => storeImage($event)"
-          >
-          Choose a File
-        </label>
+        <WalletConnection :user="user" @get-identity="getIdentity" @disconnect-wallet="userStore.setUserName('')" />
       </div>
-    </Transition>
 
-    <Transition name="slide-fade">
-      <div v-if="putImageId" class="action-box">
-        <h3 text-lg mt-2 mb-3>
-          <Transition name="fade">
-            <span v-if="isObjectReacheable" text-white inline-block mr-2><div i="carbon-checkmark-filled inline-block" /></span>
-          </Transition>
-          <div v-if="!isReadyForSharing">
-            Step 3 - Waiting for image to be available on the blockchain (can take a few minutes)<div v-if="!isObjectReacheable" i-carbon-circle-dash animate-spin text-5xl />
-          </div>
-          <div v-if="isReadyForSharing">
-            Step 3 - Done!
-            <RouterLink :to="`/img/${putImageId}`">
-              View image
-            </RouterLink>
-          </div>
-        </h3>
-      </div>
-    </Transition>
+      <Transition name="slide-fade">
+        <div v-if="user" class="action-box">
+          <h3 text-lg mt-2 mb-3>
+            <Transition name="fade">
+              <span v-if="putImageId" text-white inline-block mr-2 text-2xl><div i="carbon-checkmark-filled inline-block" /></span>
+            </Transition>
+            Step 2 - Choose an image to store on the blockchain
+          </h3>
+          <span v-if="fileName" @click="resetFileUpload">{{ fileName }}</span>
+          <label v-if="!fileName" class="custom-file-upload">
+            <input
+              id="file"
+              data-test="upload-image-input"
+              type="file"
+              accept="image/*"
+              @input="$event => storeImage($event)"
+            >
+            Choose a File
+          </label>
+        </div>
+      </Transition>
+
+      <Transition name="slide-fade">
+        <div v-if="putImageId" class="action-box">
+          <h3 text-lg mt-2 mb-3>
+            <Transition name="fade">
+              <span v-if="isReadyForSharing" text-white inline-block mr-2><div i="carbon-checkmark-filled inline-block" /></span>
+            </Transition>
+            <div v-if="!isReadyForSharing" class="flex flex-col items-center">
+              Step 3 - Wait for image to be available on the blockchain
+              <small block text-grey-400>(can take a few minutes)</small>
+              <div v-if="!isObjectReacheable" i-carbon-circle-dash animate-spin text-5xl block mt-8 text-white />
+            </div>
+            <div v-if="isReadyForSharing">
+              <span text-white inline-block mr-2><div i="carbon-checkmark-filled inline-block" /></span>
+              Step 3 - Done!
+              <br>
+              <RouterLink block :to="`/img/${putImageId}`">
+                <span inline-block mr-2><div i="carbon-share inline-block" /></span> Click to share the image:
+              </RouterLink>
+              <RouterLink :to="`/img/${putImageId}`" mt-4 py-4>
+                <div
+                  class="bg-center w-full h-32 bg-green-400 py-4"
+                  :style="{ 'background-image': `url(${dataToImage(blockchainImageData)})` }"
+                />
+              </RouterLink>
+            </div>
+          </h3>
+        </div>
+      </Transition>
 
     <!-- <div>
       putImageId: <input v-model="putImageId" type="text" p-2 w-full>
@@ -155,6 +179,7 @@ watch(isObjectReacheable, async (newVal) => {
         </li>
       </ul>
     </div> -->
+    </div>
   </div>
 </template>
 

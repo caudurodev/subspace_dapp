@@ -5,41 +5,25 @@ import type { Ref } from 'vue'
 let web3Identity: Identity | null = null
 let subspaceClient: SubspaceClient | null = null
 
-export const connectSubspaceClient = async () => {
+export const getConnectedSubspaceClient = async () => {
   if (web3Identity && subspaceClient) {
-    console.log('connectSubspaceClient', web3Identity, subspaceClient)
+    console.log('reuse connection')
     return subspaceClient
   }
-  else {
-    console.log('connectSubspaceClient...')
-  }
+  console.log('get new connection')
+
   web3Identity = await Identity.fromWeb3()
   subspaceClient = await SubspaceClient.connect(
     web3Identity,
     import.meta.env.VITE_NODE_WS_PROVIDER,
     import.meta.env.VITE_FARMER_WS_PROVIDER,
   )
-  console.log('connectSubspaceClient:', subspaceClient)
   return subspaceClient
-}
-
-export const IsObjectIdReachable = async (objectId: string): boolean => {
-  await connectSubspaceClient()
-  let isReachable = false
-  try {
-    await subspaceClient.getObject(objectId)
-    isReachable = true
-  }
-  catch (e) {
-    isReachable = false
-  }
-
-  return isReachable
 }
 
 // Please, note: Archiving takes 100-120 blocks to complete, the object is not retrievable right away
 export const getObject = async (objectId: string) => {
-  await connectSubspaceClient()
+  await getConnectedSubspaceClient()
   try {
     return await subspaceClient.getObject(objectId)
   }
@@ -49,7 +33,7 @@ export const getObject = async (objectId: string) => {
 }
 
 export const putObject = async (fileData) => {
-  await connectSubspaceClient()
+  await getConnectedSubspaceClient()
   try {
     const objectId = await subspaceClient.putObject(fileData)
     return objectId
@@ -74,6 +58,11 @@ export const pollIsObjectIdReachable = (objectId: string, isReachable: Ref) => {
   }, 2000)
 }
 
-export const dataToImage = (object) => {
-  return `data:image/*;base64,${Buffer.from(object).toString('base64')}`
+export const stopPollingObjectIdReachable = () => {
+  console.log('stopPollingObjectIdReachable')
+  clearInterval(pollInterval)
+}
+
+export const dataToImage = (fileData) => {
+  return `data:image/*;base64,${Buffer.from(fileData).toString('base64')}`
 }
