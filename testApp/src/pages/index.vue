@@ -4,11 +4,10 @@ import { useUserStore } from '~/store/user'
 import { getObject, pollIsObjectIdReachable, putObject, stopPollingObjectIdReachable } from '~/composables/useSubspace'
 
 const userStore = useUserStore()
-const { user } = toRefs(userStore)
+const { userName } = toRefs(userStore)
 
 const fileData = ref()
 const fileName = ref('')
-const imageArr = ref([])
 const blockchainImageData = ref<Uint8Array | null>()
 const isGettingObject = ref(false)
 const isObjectReacheable = ref(false)
@@ -16,13 +15,13 @@ const isReadyForSharing = ref(false)
 const isImageChosen = ref(false)
 const putImageId = ref()
 
-const loadFile = (file) => {
+const loadFileIntoBlockchain = (file: File) => {
   const reader = new FileReader()
   reader.onload = async () => {
     if (reader.result) {
       isGettingObject.value = true
       fileData.value = new Uint8Array(reader.result)
-      const objectId: string = await putObject(fileData.value)
+      const objectId = await putObject(fileData.value)
       if (objectId) {
         putImageId.value = objectId
         pollIsObjectIdReachable(objectId, isObjectReacheable)
@@ -32,44 +31,41 @@ const loadFile = (file) => {
   reader.readAsArrayBuffer(file)
 }
 
-const storeImage = (e) => {
+const storeImageInBlockchain = (e: Event) => {
   isImageChosen.value = true
   isReadyForSharing.value = false
-  if (e.target.files[0].type.includes('image/')) {
-    if (e.target.files && e.target.files.length > 0) {
-      loadFile(e.target.files[0])
-      fileName.value = e.target.files[0].name
+  const target = e.target as HTMLInputElement
+  if (target?.files[0]?.type?.includes('image/')) {
+    if (target.files && target.files.length > 0) {
+      loadFileIntoBlockchain(target.files[0])
+      fileName.value = target.files[0].name
     }
   }
   else {
     // TODO:
-    // - visually display message to user
-    console.log('Please use an image file for this demo.')
+    // - Display error message to user
   }
 }
 
-const getImage = async () => {
+const getImageFromBlockchain = async () => {
   if (!putImageId.value)
     return
   const imgData = await getObject(putImageId.value)
-  if (imgData) {
+  if (imgData)
     blockchainImageData.value = imgData
-    imageArr.value.push(imgData)
-  }
 }
 
-const getIdentity = async () => {
+const getPolkadotIdentity = async () => {
   const identity = await Identity.fromWeb3()
   if (identity) {
-    let name = ''
-    identity.getKeyring().getPairs().map((account) => {
-      name = account.meta.name.toUpperCase()
-    })
-    userStore.setUserName(name)
+    const userName = identity.getKeyring().getPairs().map((account) => {
+      return account.meta.name
+    })[0]
+    if (userName)
+      userStore.setUserName(userName)
   }
   else {
     // TODO - handle visually
-    console.log('error getting identity')
   }
 }
 
@@ -82,10 +78,10 @@ const resetFileUpload = () => {
 
 watch(isObjectReacheable, async (newVal) => {
   if (newVal) {
-    await getImage()
+    await getImageFromBlockchain()
     isReadyForSharing.value = true
-    isObjectReacheable.value = false
     isGettingObject.value = false
+    isObjectReacheable.value = false
   }
 })
 </script>
@@ -96,15 +92,15 @@ watch(isObjectReacheable, async (newVal) => {
       <div class="action-box">
         <h3>
           <Transition name="fade">
-            <span v-if="user" class="status-icon"><div i="carbon-checkmark-filled inline-block" /></span>
+            <span v-if="userName" class="status-icon"><div i="carbon-checkmark-filled inline-block" /></span>
           </Transition>
           <b>Step 1 -</b> Connect your Polkadot Wallet
         </h3>
-        <WalletConnection :user="user" @get-identity="getIdentity" @disconnect-wallet="userStore.setUserName('')" />
+        <WalletConnection :user-name="userName" @get-identity="getPolkadotIdentity" @disconnect-wallet="userStore.setUserName('')" />
       </div>
 
       <Transition name="slide-fade">
-        <div v-if="user" class="action-box">
+        <div v-if="userName" class="action-box">
           <h3 text-lg mt-2 mb-3>
             <Transition name="fade">
               <span v-if="isImageChosen" class="status-icon"><div i="carbon-checkmark-filled inline-block" /></span>
@@ -117,7 +113,7 @@ watch(isObjectReacheable, async (newVal) => {
               data-test="upload-image-input"
               type="file"
               accept="image/*"
-              @input="$event => storeImage($event)"
+              @input="$event => storeImageInBlockchain($event)"
             >
             <div i="carbon-image" inline-block align-middle mr-2 />
             Choose an Image

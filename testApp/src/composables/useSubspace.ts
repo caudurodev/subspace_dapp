@@ -6,11 +6,8 @@ let web3Identity: Identity | null = null
 let subspaceClient: SubspaceClient | null = null
 
 export const getConnectedSubspaceClient = async () => {
-  if (web3Identity && subspaceClient) {
-    console.log('reuse connection')
+  if (web3Identity && subspaceClient)
     return subspaceClient
-  }
-  console.log('get new connection')
 
   web3Identity = await Identity.fromWeb3()
   subspaceClient = await SubspaceClient.connect(
@@ -28,18 +25,19 @@ export const getObject = async (objectId: string) => {
     return await subspaceClient.getObject(objectId)
   }
   catch (e) {
-    console.log('error get object:', e)
+    // TODO: handle errors
+    // console.log('error get object:', e)
   }
 }
 
-export const putObject = async (fileData) => {
+export const putObject = async (fileData: Uint8Array): Promise<string | null> => {
   await getConnectedSubspaceClient()
   try {
     const objectId = await subspaceClient.putObject(fileData)
     return objectId
   }
   catch (e) {
-    console.log('error put object', e)
+    return null
   }
 }
 

@@ -4,7 +4,7 @@
 // - handle connection errors
 
 interface Props {
-  user: string | null
+  userName: string | null
 }
 const props = withDefaults(defineProps<Props>(), {
   user: () => null,
@@ -13,16 +13,16 @@ const emit = defineEmits<{
   (e: 'getIdentity'): void
   (e: 'disconnectWallet'): void
 }>()
-const user = toRef(props, 'user')
+const userName = toRef(props, 'userName')
 </script>
 
 <template>
-  <button class="action-btn" data-test="wallet-connect-btn" @click="user ? emit('disconnectWallet') : emit('getIdentity')">
+  <button class="action-btn" data-test="wallet-connect-btn" @click="userName ? emit('disconnectWallet') : emit('getIdentity')">
     <div i="carbon-wallet" inline-block align-middle mr-2 />
-    <span v-if="!user">Connect Wallet</span>
-    <span v-if="user">
+    <span v-if="!userName">Connect Wallet</span>
+    <span v-if="userName">
       Connected:
-      <span data-test="wallet-username" text-bold mr-2>{{ user }}</span>
+      <span data-test="wallet-username" text-bold mr-2>{{ userName }}</span>
       <div i="carbon-close-filled" inline-block align-middle pl-2 />
     </span>
   </button>

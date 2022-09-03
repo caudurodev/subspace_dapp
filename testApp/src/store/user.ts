@@ -1,14 +1,14 @@
 import { acceptHMRUpdate, defineStore } from 'pinia'
 
 export const useUserStore = defineStore('user', () => {
-  const user = ref('')
+  const userName = ref('')
 
   function setUserName(name: string): void {
-    user.value = name
+    userName.value = name
   }
 
   return {
-    user,
+    userName,
     setUserName,
   }
 })
