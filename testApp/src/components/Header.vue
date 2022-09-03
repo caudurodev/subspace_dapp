@@ -9,7 +9,6 @@
         Subspace Mega
         <br>
         Image Share
-        <div class="i-logos-vue text-orange-400" />
       </h1>
       <h2 text-xl pt-6>
         Upload any image to start sharing on the blockchain!
@@ -19,9 +18,9 @@
 </template>
 
 <style scoped>
-h1{
-    background-image: linear-gradient(45deg, #4A75EF, #E7344D);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+h1 {
+  background-image: linear-gradient(45deg, #4A75EF, #E7344D);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 </style>

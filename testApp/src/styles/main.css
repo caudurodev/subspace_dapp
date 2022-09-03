@@ -1,5 +1,6 @@
 @import './font.css';
 @import './markdown.css';
+@import './transitions.css';
 
 html,
 body,
@@ -27,4 +28,8 @@ html.dark {
   left: 0;
   width: 100%;
   height: 2px;
+}
+
+.action-btn{
+  @apply text-white bg-blue-500 py-2 px-6 my-4 rounded-xl hover:bg-blue-700 font-bold;
 }
