@@ -7,7 +7,7 @@ interface Props {
   userName: string | null
 }
 const props = withDefaults(defineProps<Props>(), {
-  user: () => null,
+  userName: () => null,
 })
 const emit = defineEmits<{
   (e: 'getIdentity'): void

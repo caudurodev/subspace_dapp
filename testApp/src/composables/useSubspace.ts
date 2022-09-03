@@ -5,7 +5,7 @@ import type { Ref } from 'vue'
 let web3Identity: Identity | null = null
 let subspaceClient: SubspaceClient | null = null
 
-export const getConnectedSubspaceClient = async () => {
+export const getConnectedSubspaceClient = async (): Promise<SubspaceClient | null> => {
   if (web3Identity && subspaceClient)
     return subspaceClient
 
@@ -57,10 +57,9 @@ export const pollIsObjectIdReachable = (objectId: string, isReachable: Ref) => {
 }
 
 export const stopPollingObjectIdReachable = () => {
-  console.log('stopPollingObjectIdReachable')
   clearInterval(pollInterval)
 }
 
-export const dataToImage = (fileData) => {
+export const dataToImage = (fileData: Uint8Array): string => {
   return `data:image/*;base64,${Buffer.from(fileData).toString('base64')}`
 }

@@ -56,17 +56,14 @@ const getImageFromBlockchain = async () => {
 }
 
 const getPolkadotIdentity = async () => {
-  const identity = await Identity.fromWeb3()
-  if (identity) {
-    const userName = identity.getKeyring().getPairs().map((account) => {
+  const identity: Identity = await Identity.fromWeb3()
+  const userName: string = identity
+    ? identity.getKeyring().getPairs().map((account) => {
       return account.meta.name
     })[0]
-    if (userName)
-      userStore.setUserName(userName)
-  }
-  else {
-    // TODO - handle visually
-  }
+    : null
+  if (userName)
+    userStore.setUserName(userName)
 }
 
 const resetFileUpload = () => {
@@ -96,11 +93,11 @@ watch(isObjectReacheable, async (newVal) => {
           </Transition>
           <b>Step 1 -</b> Connect your Polkadot Wallet
         </h3>
-        <WalletConnection :user-name="userName" @get-identity="getPolkadotIdentity" @disconnect-wallet="userStore.setUserName('')" />
+        <WalletConnection :user-name="userName" @get-identity="getPolkadotIdentity" @disconnect-wallet="userStore.setUserName('');resetFileUpload()" />
       </div>
 
       <Transition name="slide-fade">
-        <div v-if="userName" class="action-box">
+        <div v-if="userName" class="action-box z-10">
           <h3 text-lg mt-2 mb-3>
             <Transition name="fade">
               <span v-if="isImageChosen" class="status-icon"><div i="carbon-checkmark-filled inline-block" /></span>
@@ -177,10 +174,10 @@ watch(isObjectReacheable, async (newVal) => {
 
 <style setup>
 .action-box{
-  @apply my-2 bg-blue-200 p-6 rounded-3xl w-2/3;
+  @apply my-2 bg-blue-200 p-6 rounded-3xl w-2/3 shadow-xl  border-2 border-blue-300/30 dark:bg-gray-900;
 }
 .action-box h3{
-  @apply text-lg py-2 text-gray-600 font-700
+  @apply text-lg py-2 text-gray-600 font-700 dark:text-gray-200;
 }
 .status-icon{
   @apply text-white inline-block mr-2 text-2xl align-middle;
