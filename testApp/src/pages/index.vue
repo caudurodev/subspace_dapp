@@ -154,7 +154,7 @@ watch(isObjectReacheable, async (newVal) => {
             <span v-if="isReadyForSharing"><b>Step 4 -</b> Done!</span>
             <Transition name="fade">
               <div v-if="isReadyForSharing" py-4>
-                <RouterLink block :to="`/img/${putImageId}`">
+                <RouterLink block :to="`/img/${putImageId}`" data-test="image-share-btn">
                   <span mr-2 py-4 block><div i="carbon-share" inline-block /> Click to share the image:</span>
                 </RouterLink>
                 <RouterLink :to="`/img/${putImageId}`" mt-4 py-4>

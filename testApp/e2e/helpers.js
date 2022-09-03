@@ -30,10 +30,7 @@ export const authorizeURL = async (page, context, extensionId, URL) => {
   await appPage.waitForURL(URL)
   await appPage.bringToFront()
   await appPage.locator('text=Connect Wallet').click()
-
   await page.bringToFront()
-
-  //   await appPage.goto(`chrome-extension://${extensionId}/index.html#/`)
   await page.locator('button:has-text("Yes, allow this application access")').click()
   await appPage.close()
   await page.goto(URL)
@@ -45,15 +42,8 @@ export const authorizeTransaction = async (page, context, extensionId) => {
   await appPage.bringToFront()
   await appPage.goto(`chrome-extension://${extensionId}/index.html#/`)
   await expect(appPage).toHaveURL(`chrome-extension://${extensionId}/index.html#/`)
-
-  //   if (await appPage.locator('button:has-text("Understood, let me continue")').isVisible()) {
-  //     await appPage.locator('button:has-text("Understood, let me continue")').click()
-  //     await appPage.locator('button:has-text("Yes, allow this application access")').click()
-  //   }
-  //   else {
   await appPage.locator('#root > main > div.ButtonArea-sc-1254szc-0.gCQZqr.SignArea-sc-fme29r-0.ZEOwg > div:nth-child(1) > div > input').fill(TEST_PASSWORD)
   await appPage.locator('button:has-text("Sign the transaction")').click()
-  //   }
   await page.bringToFront()
   await appPage.close()
 }
